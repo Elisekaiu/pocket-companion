@@ -1,4 +1,4 @@
-# 07 · Pitfalls
+# 08 · Pitfalls
 
 What went wrong while building this, in roughly the order it happened.
 

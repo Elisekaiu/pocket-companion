@@ -40,6 +40,8 @@ A *question* feeling only applies when nothing else matched. Text with no match 
 
 The pet goes on trips in real time and comes back with souvenirs and postcards. The goal: every trip feels different and a little unexpected.
 
+> **This part is personal.** Which places exist, what the pet likes, what it eats and who it meets should come from *your* life and *your* companion's tastes: the cities you dream of, the café you went to, the inside jokes. The structure below is shareable; the content is not meant to be copied. Sixteen destinations is a good start; the combinations do the rest.
+
 ### Each destination is a small world
 
 ```js
