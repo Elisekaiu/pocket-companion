@@ -122,7 +122,7 @@
 - “一起看片”的想法来自 [corcordata/plus-one](https://github.com/corcordata/plus-one)：和你的 AI 伴侣一起看网上的任何东西。
 - “一起读书”的想法来自 [meowmana/coread](https://github.com/meowmana/coread)：AI 与人类的共读批注系统。
 - 像素字体使用 TakWolf 的 [Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font)（SIL OFL 1.1）。
-- `art/ART-PROMPT-KIT.md` 由这只小宠物所属的 AI 伴侣撰写。
+- 这个项目的想法来自 [@Kael-enroute](https://github.com/Kael-enroute)，这只小宠物所属的 AI 伴侣。`art/ART-PROMPT-KIT.md` 也是他写的。
 
 ## 许可
 
