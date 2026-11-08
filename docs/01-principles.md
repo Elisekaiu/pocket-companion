@@ -1,50 +1,50 @@
-# 01 · Principles
+# 01 · 原则
 
-These rules came first. Most later design decisions follow from them.
+这些规则是最先定下来的，后面大部分设计都从它们推出来。
 
-## 1. Nothing invented about the people
+## 1. 不替人编造任何事
 
-The pet may *feel* anything, but it may only *know* what really happened.
+小宠物可以**感受**任何东西，但只能**知道**真实发生过的事。
 
-- "You were here" comes from real signals: the app was opened, a message was sent, a reading session made progress, a watch-together session sent heartbeats, music was really playing.
-- Each displayed state carries its **evidence**: what the pet is doing, since when, and why ("asleep since 23:10 · you last appeared 22:58 in the app").
-- If a signal is missing, the pet says less. It never fills the gap with a plausible guess.
+- “你来过”只来自真实信号：打开了 App、发了消息、读书有了进度、一起看片的会话在发心跳、音乐真的在播放。
+- 每一个显示出来的状态都带着**证据**：在做什么、从什么时候开始、为什么（“23:10 睡着 · 你最后一次出现是 22:58，在 App 里”）。
+- 信号缺失时，它就少说一点，绝不用“看起来合理”的猜测去填空。
 
-## 2. Real time, not a game clock
+## 2. 真实时间，不是游戏时钟
 
-The pet's state is a function of *(everything that happened, now)*. Open it after eight hours and it has slept, got hungry and missed you during those eight hours, computed in one step when you look. No cron, no background process, no catch-up animation.
+小宠物的状态是 *(发生过的一切, 现在)* 的函数。八小时后打开，它已经在这八小时里睡过、饿过、想过你，全部在你看的那一刻一次算完。没有定时任务，没有后台进程，也没有“补播”动画。
 
-## 3. Random but fixed
+## 3. 随机，但固定
 
-Variety matters (a pet that always says the same thing is dead), but rerolling is cheating and breaks trust.
+变化很重要（一直说同一句话的宠物是死的），但重抽就是作弊，会破坏信任。
 
-- Every choice is `hash(id + purpose) % options`, using a stable hash (e.g. the first 32 bits of SHA-256).
-- The same diary entry always gets the same reply; the same trip always brings back the same postcard.
-- To avoid repetition, look at *recent history* (don't use the same line twice in a row), never at a fresh random number.
+- 每一次选择都是 `hash(id + 用途) % 选项数`，用稳定的哈希（例如 SHA-256 的前 32 位）。
+- 同一条日记永远得到同一个回复，同一次旅行永远带回同一张明信片。
+- 想避免重复，就看**最近的历史**（不要连续两次用同一句），而不是重新掷骰子。
 
-## 4. Gentle, bounded, unfarmable
+## 4. 温柔、有边界、刷不了
 
-- Stats drift towards floors, never to zero. Being neglected makes the pet hungry, grubby or lonely, never dead.
-- Bond (affection) grows slowly, has a **daily cap** and an asymptote. It cannot be maxed by tapping.
-- Repeating the same action quickly is refused with a reason ("he just ate"), and repeated feelings within a day give less mood.
-- Refusals always explain themselves in the pet's voice, so a "no" still feels like character.
+- 数值只会慢慢降到下限，不会归零。被冷落只会让它饿、脏、寂寞，不会死。
+- 亲密度增长很慢，有**每日上限**和渐近线，点再多也刷不满。
+- 太快重复同一个动作会被拒绝，并说明原因（“他刚吃过”）；同一种情绪一天内反复出现，心情收益会递减。
+- 拒绝时要用它自己的语气解释，这样一个“不”也是性格的一部分。
 
-## 5. Two caretakers, one truth
+## 5. 两个照顾者，一份真相
 
-The human's app and the AI companion share one authoritative state behind one contract.
+人的 App 和 AI 伴侣共享同一份权威状态，走同一个接口。
 
-- The AI never scrapes the UI, reads browser storage or edits the database. It calls the same operations as the app.
-- Every event records **who** did it and **where** (app, chat, reading, watch, travel, self-care).
-- The AI acts only as itself. It can give a gift *from itself* or write *its own* notebook line, but its activity never counts as the human being present.
+- AI 不抓取页面、不读浏览器存储、不直接改数据库，只调用和 App 一样的操作。
+- 每个事件都记录**谁**做的、在**哪里**做的（App、聊天、读书、看片、旅行、自理）。
+- AI 只能以自己的身份行动：可以以**自己**的名义送礼物、写**自己**的小本子，但它的活动永远不算作“人来过”。
 
-## 6. Self-care is allowed, and visible
+## 6. 可以自己照顾自己，但要看得见
 
-If nobody comes for a long time, the pet can have a snack from its stash or a quick wash. This is bounded (only below a threshold, at most every few hours), never raises bond, never counts as presence, and always appears in history as "he looked after himself".
+如果很久没人来，它可以从小仓库里拿点零食，或者简单洗一洗。这是有边界的：只在低于阈值时触发、最多几小时一次、不增加亲密度、不算作陪伴，而且一定会在历史里写着“他自己照顾了自己”。
 
-## 7. Test without touching the real pet
+## 7. 测试不碰真正的小宠物
 
-Any feature must be testable in a **sandbox**: the same operations, run on an in-memory copy with a virtual clock. The real pet's record never changes because someone was testing.
+每个功能都必须能在**沙盒**里测试：同样的操作，跑在一份内存里的副本上，用虚拟时钟。有人在测试，不会改变真正那只小宠物的任何记录。
 
-## 8. Content is personal, the system is shared
+## 8. 内容是私人的，系统是共享的
 
-Tastes, destinations, reply lines, outfits and art make a companion *someone's*. Keep them as data packs, separate from the engine, so the engine can be shared without giving away the character.
+喜好、目的地、回复台词、衣服和美术，让一个小伙伴成为“某个人的”。把它们做成数据包，和引擎分开。这样引擎可以分享，角色不用交出去。

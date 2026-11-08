@@ -1,47 +1,47 @@
-# 06 · Crisp pixels in a web page
+# 06 · 网页里的清晰像素
 
-Pixel art in a browser goes blurry in many small ways. These are the fixes that held up on real phones.
+浏览器里的像素画会以很多种小方式变糊。这些是在真实手机上经受住考验的做法。
 
-## Draw on canvas at integer scale
+## 在 canvas 上画，整数倍缩放
 
-- Keep the scene at its native size (e.g. 120×96) in a canvas, and scale the canvas element by a **whole number of device pixels**: `scale = floor(available / native)` with `devicePixelRatio` taken into account.
-- `image-rendering: pixelated` on every canvas and image, and `ctx.imageSmoothingEnabled = false`.
-- A non-integer CSS size (e.g. 2.5×) always blurs or produces uneven pixels. Leave a margin instead.
+- 场景保持原生尺寸（例如 120×96）画在 canvas 里，canvas 元素按**整数个设备像素**放大：`scale = floor(可用空间 / 原生尺寸)`，并考虑 `devicePixelRatio`。
+- 所有 canvas 和图片都加 `image-rendering: pixelated`，并设 `ctx.imageSmoothingEnabled = false`。
+- 非整数的 CSS 尺寸（例如 2.5 倍）一定会糊或者像素大小不均。宁可留一点空白。
 
-## Pixel text: a glyph atlas instead of a web font
+## 像素文字：用字形图集代替网页字体
 
-A pixel web font at 12 px looks fine on desktop and blurry or overlapping on a phone (sub-pixel positioning, hinting, fallback fonts). What worked:
+12px 的像素网页字体在电脑上还行，在手机上就会变糊或者重叠（亚像素定位、hinting、回退字体）。行得通的做法：
 
-1. Take an open-licensed pixel font (for CJK, e.g. Fusion Pixel 12px, SIL OFL).
-2. In headless Chromium, draw **only the characters your UI uses** (collected from your source files) at the font's native size, threshold to 1-bit, and pack them into a PNG atlas + a JSON of `{char: [x, y, width]}`.
-3. Detect missing glyphs (the browser fell back to an anti-aliased font: many semi-transparent pixels) and leave them out.
-4. Lay text out yourself from the atlas, at integer scale, with explicit line breaking.
+1. 找一款开源授权的像素字体（中文可以用 Fusion Pixel 12px，SIL OFL）。
+2. 在无头 Chromium 里，只把**界面真正用到的字**（从源文件里收集）按字体的原生尺寸画出来，二值化成 1-bit，打包成一张 PNG 图集 + 一个 `{字: [x, y, 宽]}` 的 JSON。
+3. 检测缺字（浏览器回退到了带抗锯齿的字体：半透明像素很多），把它们排除。
+4. 自己用图集排版：整数倍缩放，自己处理换行。
 
-Result: ~1,300 glyphs in an ~84 KB PNG instead of a 700 KB font, and identical pixels on every device. Rebuild the atlas whenever the text changes.
+结果：约 1300 个字形，一张约 84 KB 的 PNG，代替 700 KB 的字体，而且在每台设备上像素完全一致。文字一改，就重建图集。
 
-**Theme-aware text.** If you paint text into a canvas, the colour is baked in. Store the CSS variable name (e.g. `--px-ink`) with each painted text and repaint when the theme changes. Otherwise a light-mode switch leaves washed-out dark-mode text behind.
+**跟随主题的文字。** 把文字画进 canvas，颜色就固定了。每段画出来的文字都记住它的 CSS 变量名（例如 `--px-ink`），切换主题时重画。否则切到日间模式后，会留下暗色模式那种发灰的字。
 
-## Buttons: one viewport for all
+## 按钮：所有按钮共用一个框
 
-When some buttons come from a different source sheet, they look bigger or blurrier even at the same CSS size, because the *visible artwork* differs.
+当一部分按钮来自另一张素材图时，即使 CSS 尺寸一样，它们也会显得更大或更糊，因为**看得见的图案**不一样。
 
-1. Crop each button with a small transparent margin. Never auto-trim tight.
-2. Area-average the new ones so their **frame height in art pixels** matches the originals (e.g. 64 px), correcting non-square pixels in the source.
-3. Recolour new buttons to the originals' palette if they don't match.
-4. Place every button centred in **one shared viewport** (e.g. 123×69) on one baseline.
-5. Draw all of them at one integer scale. Never resize one icon on its own.
+1. 每个按钮带一点透明边距裁剪，绝对不要自动紧贴裁边。
+2. 对新按钮做区域平均缩放，让它们的**边框高度（以像素画的像素计）**和原来的一致（例如 64 px），顺便修正源图里不是正方形的像素。
+3. 新按钮和原来的调色板对不上，就重新上色。
+4. 每个按钮都居中放进**同一个视口**（例如 123×69），站在同一条基线上。
+5. 全部用同一个整数倍缩放绘制，永远不要单独缩放某一个图标。
 
-Build a QA view with all buttons side by side, guides for viewport, baseline and visible bounds, on light and dark backgrounds.
+做一个 QA 视图：所有按钮并排，带视口、基线和可见边界的辅助线，分别放在浅色和深色背景上。
 
-## Light and dark
+## 日间和夜间
 
-- Light should be warm ivory with real contrast. Pale grey text on ivory looks elegant on a monitor and unreadable on a phone in daylight.
-- Dark should be deep navy, not black, with borders bright enough to read.
-- Never let an asset bring its own background: a white sheet in dark mode, or a black box behind a sprite in light mode, is almost always a transparency bug.
+- 日间应该是温暖的象牙白，并且有足够的对比度。在显示器上显得优雅的浅灰字，到了白天户外的手机上就看不清。
+- 夜间应该是深海军蓝而不是纯黑，边框要亮到能看清。
+- 素材绝不能自带背景：暗色模式下出现一张白纸，或者日间模式里精灵图后面有个黑框，几乎都是透明度的 bug。
 
-## Motion
+## 动态
 
-- Run the room at ~30 fps with `requestAnimationFrame` gated by a timer. That's smooth enough for pixel art and easy on battery.
-- Give the pet a **wander** behaviour in idle states: walk left and right, flip, little hops, pause. Five seconds of a stationary sprite reads as "broken".
-- Use short dissolves between states, not hard cuts.
-- Stop the loop when the page is hidden.
+- 房间用 `requestAnimationFrame` 配合计时器，跑大约 30 fps。对像素画来说够顺，也省电。
+- 空闲状态给它**走来走去**的行为：左右走、转身、小跳、停一下。一个五秒钟一动不动的精灵图，看起来就像“坏了”。
+- 状态之间用短暂的溶解过渡，不要硬切。
+- 页面隐藏时停止循环。

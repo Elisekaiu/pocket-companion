@@ -1,31 +1,31 @@
-# 04 · Wardrobe on a pixel sprite
+# 04 · 像素换装
 
-Dress-up is the feature that looks easy and isn't. This is the system that finally worked, after several that didn't.
+换装是那种看起来简单、做起来并不简单的功能。这是试过好几种方法之后，终于行得通的那一套。
 
-## The rule
+## 规则
 
-> **One canonical base body per pose family. Clothing is exported as transparent overlays on the exact same canvas, containing clothing pixels only. Never redraw the character.**
+> **每个姿势家族一个标准基础身体。衣服导出为同一画布上的透明图层，只包含衣服的像素。永远不要重画角色。**
 
-For poses where clothing can't sensibly fit (asleep, bath, lying down), use explicit precomposed variants or a fallback (e.g. the outfit folded beside the bed), not a forced body outfit.
+对于衣服放不上去的姿势（睡觉、洗澡、躺着），用专门画好的合成图或者替代方案（例如衣服叠好放在床边），不要硬套。
 
-## Why not one sprite per outfit?
+## 为什么不是“每套衣服一张图”？
 
-That was the first attempt: generate the character wearing each outfit, then cut it out. It failed because every generated image redraws the character slightly differently: a different head size, ear angle, belly line or paw position. Anchors can't fix that, because the *anatomy itself* moved. Swapping outfits made the pet visibly change shape.
+最早就是这么做的：生成角色穿着每一套衣服的样子，再抠出来。失败的原因是，每生成一张图，角色就被重画一次，头的大小、耳朵角度、肚子的线条、爪子的位置都会有一点不同。锚点救不了这个，因为**身体结构本身**变了。一换衣服，小宠物的体型就肉眼可见地变了。
 
-## Pose families
+## 姿势家族
 
-Group poses into families that share a skeleton:
+把共用骨架的姿势分组：
 
-- **standing / main**: idle, happy, eating, ... → full wardrobe
-- **sitting**: reading, writing, gaming → full wardrobe with sitting offsets
-- **sleep**: asleep, dreaming, just woke → sleep pieces only (cap, mask), outfit folded nearby
-- **special**: bath, travel, sick → fallback: accessories only or none
+- **站立 / 主要**：发呆、开心、吃东西 … → 完整衣柜
+- **坐着**：读书、写字、玩游戏 → 完整衣柜，加坐姿偏移
+- **睡觉**：睡着、做梦、刚醒 → 只有睡眠单品（睡帽、眼罩），衣服叠在旁边
+- **特殊**：洗澡、旅行、生病 → 替代方案：只有配件或什么都不穿
 
-Each family has one base sprite. Dress-up happens on the base.
+每个家族一个基础图，换装都在基础图上进行。
 
-## Anchors: name the place, not the item
+## 锚点：命名位置，而不是物品
 
-In a calibration file, give each family named anchor points measured on its base sprite:
+在校准文件里，为每个家族写下在它的基础图上量出来的命名锚点：
 
 ```json
 "anchors": { "standing": {
@@ -35,7 +35,7 @@ In a calibration file, give each family named anchor points measured on its base
 }}
 ```
 
-Each accessory says which anchor it uses and how to sit there:
+每个配件说明它用哪个锚点、怎么放：
 
 ```json
 "crown":      { "anchor": "head_top", "pivot": [0.5, 1], "transform": { "x": 0, "y": 5, "scale": 1.08, "z": 3 } },
@@ -46,13 +46,13 @@ Each accessory says which anchor it uses and how to sit there:
   "cup_r": { "anchor": "ear_r",   "z": 2 } } }
 ```
 
-- `transform` = `{x, y, scale, rotation, z}`, plus optional `transformByPoseFamily` overrides.
-- **Parts** split items that touch several places. Headphones as one image always covered the eyes at some scale; as band + two cups, each piece lands where it belongs. Glasses work the same way (lens · bridge · lens on the eye points).
-- `pivot` says which point of the item sits on the anchor (bottom-centre for hats, centre for glasses).
+- `transform` = `{x, y, scale, rotation, z}`，可以再用 `transformByPoseFamily` 按家族覆盖。
+- **拆成部件**：会碰到好几个位置的物品要拆开。耳机做成一张图时，不管怎么缩放都会挡住眼睛；拆成头梁和左右两个耳罩，每一块都落在该在的位置。眼镜也一样（镜片 · 鼻梁 · 镜片，对准两只眼睛）。
+- `pivot` 说明物品的哪个点对准锚点（帽子用底部中心，眼镜用中心）。
 
-## Body outfits: fit onto a template, don't stretch
+## 衣服：套进模板，而不是拉伸
 
-Give the base a **fitting template**: neckline, shoulders, chest, hem, paws, body bounds and torso bounds.
+给基础图一个**试衣模板**：领口、肩膀、胸口、下摆、爪子、身体范围、躯干范围。
 
 ```json
 "templates": { "standing": {
@@ -60,26 +60,26 @@ Give the base a **fitting template**: neckline, shoulders, chest, hem, paws, bod
   "paws": [[29, 55], [60, 55]], "body_bounds": [25, 61], "torso_bounds": [29, 60] } }
 ```
 
-Each outfit says which part of its source art is the garment (`src` rectangle) and how wide it should be (`w`). At build or load time:
+每套衣服说明源图里哪一块是衣服（`src` 矩形），以及应该多宽（`w`）。在构建或加载时：
 
-1. Crop the garment at **source resolution** (the high-res generated image).
-2. Resample that rectangle onto the template window (neckline → hem, shoulder to shoulder).
-3. Only then pixelize it to the sprite's pixel size (area-average, then quantize to the outfit's palette).
-4. Split into **layers**: back (cape, behind the body), body, sleeves, paws, trim, drawn in z order around the base.
-5. Add an **occlusion mask** (hull of the torso, expanded a pixel or two) so the base doesn't poke through.
+1. 在**原始分辨率**（高清生成图）上裁出衣服。
+2. 把这个矩形重采样到模板窗口上（领口 → 下摆，肩到肩）。
+3. 然后才像素化到精灵图的像素尺寸（先区域平均，再量化到这套衣服的调色板）。
+4. 拆成**图层**：背后（披风，在身体后面）、身体、袖子、爪子、装饰，按 z 顺序围绕基础图绘制。
+5. 加一个**遮挡蒙版**（躯干的外轮廓，向外扩一两个像素），避免基础图从衣服下面露出来。
 
-Keep per-outfit scale close to 1 (≈ 0.95–1.08). If an outfit needs more than that, the source crop or width is wrong: **re-export it, don't stretch it.** Free warping breaks pixel art.
+每套衣服的缩放保持在 1 附近（约 0.95–1.08）。如果需要更多，说明源图的裁剪或宽度错了：**重新导出，不要拉伸。** 自由变形会毁掉像素画。
 
-Small per-outfit `x` corrections are normal: a cape with a long right side *looks* off-centre even when its box is centred. Fix it visually, by eye, per outfit.
+每套衣服做一点 `x` 的微调是正常的：一件右边比较长的披风，即使包围盒是居中的，**看起来**也会偏。靠眼睛一套一套地修。
 
-## Tools that made this possible
+## 让这一切可行的工具
 
-- **A calibration sandbox page**: pick any item × pose family, drag sliders for x / y / scale / rotation / z, toggle guides (anchors, body bounds, shoulders, hem, occlusion mask), and **export JSON** to paste into the calibration file. Never edits the real pet.
-- **Bounds warnings**: flag pieces that cover the eyes (test against the actual pixels, not the bounding box), leave the body bounds, or hide the face.
-- **A QA sheet**: every outfit and accessory on every family in one image, regenerated after each change. Mistakes are obvious when you see 40 at once.
+- **校准沙盒页面**：选任意物品 × 姿势家族，拖动 x / y / 缩放 / 旋转 / z 的滑块，切换辅助线（锚点、身体范围、肩膀、下摆、遮挡蒙版），然后**导出 JSON** 贴回校准文件。不会改动真正的小宠物。
+- **越界警告**：标出挡住眼睛（用真实像素判断，不是包围盒）、超出身体范围、遮住脸的物品。
+- **QA 总表**：所有衣服和配件在所有家族上排成一张图，每次修改后重新生成。40 个摆在一起，错误一眼就能看出来。
 
-## Pitfalls here
+## 这里的坑
 
-- Measure coverage on the **torso**, not the whole body. Wings and tails make an outfit look "too small" when it isn't.
-- An outfit that seems empty may just be **too tall**: only the collar lands in the window. Re-crop the source.
-- Keep nearest-neighbour everywhere after pixelizing. One smooth scale ruins it.
+- 覆盖率要在**躯干**上量，而不是整个身体。翅膀和尾巴会让衣服看起来“太小”，其实并没有。
+- 一套看起来“空空的”衣服，可能只是**太长了**：只有领子落在了窗口里。重新裁源图。
+- 像素化之后全程最近邻缩放。只要有一次平滑缩放，就全毁了。

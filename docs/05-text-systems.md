@@ -1,75 +1,77 @@
-# 05 · Text systems: a notebook that answers, and postcards that surprise
+# 05 · 文字系统：会回应的小本子，和总能带来惊喜的明信片
 
-Most of a virtual pet's personality is in its words. Two systems carry a lot of it.
+电子宠物的性格，大部分藏在它说的话里。这两个系统撑起了很大一部分。
 
-## The notebook: he reads what you write
+## 小本子：他会读你写的东西
 
-The human writes a line. The pet reacts with a pose, a speech-bubble emote, a short reply kept under the line, and a small effect on mood and bond.
+人写下一行字，小宠物用一个姿势、一个气泡表情、一句留在那行字下面的回复，以及对心情和亲密度的一点影响来回应。
 
-### Feelings, not keywords
+### 是情绪，不是关键词
 
-Define ~20 **feelings**, each with trigger words, a sprite, an emote, a label, an effect and several reply lines:
+定义大约 20 种**情绪**，每种都有触发词、精灵图、表情、标签、效果和好几句回复：
 
 ```js
-{ id:'love', sprite:'shy', emote:'♥', label:'blushing', mood:+6, bond:+0.3,
+{ id:'love', sprite:'shy', emote:'♥', label:'脸红了', mood:+6, bond:+0.3,
   words:['我爱你','我愛你','爱你','喜欢你','love you','抱抱','mua', ...],
   lines:['再说一次好不好？我想再听一次。', '贴贴！（扑过去）', ...] }
 ```
 
-Include the hard ones, not only the nice ones: **hurt, sad, sick, tired, angry**, plus **sorry** and **relief** for making up. A pet that only answers love feels like a vending machine. One that can be a little hurt by "我讨厌你" and forgive "对不起嘛" feels alive.
+一定要包括难受的情绪，不能只有好的：**受伤、难过、生病、累、生气**，还有用来和好的**对不起**和**松了一口气**。只会回应“爱”的宠物像一台自动售货机；会被“我讨厌你”伤到一点、又会原谅“对不起嘛”的，才像活的。
 
-Order the feelings by **priority**. When several match, the first wins (pain and illness before small talk), and a second feeling can add a short tail ("…晚安哦。").
+情绪按**优先级**排序：同时命中好几种时，排在前面的赢（疼痛和生病优先于闲聊），第二种情绪可以加一个小尾巴（“…晚安哦。”）。
 
-### Three rules that made detection feel smart
+### 让判断显得聪明的三条规则
 
-1. **Negation flips the feeling.** A negator right before a word (不 / 没 / 别 / not) turns love, missing or praise into *hurt*; turns sad, tired, sick or angry into *relief*; turns good news into *sad*.
-   `不爱你` → hurt · `不难过了` → relief · `没考过` → sad
-2. **The longer phrase wins.** A word inside a longer matched phrase doesn't count on its own. `考试过了` is good news, so its `考试` must not also trigger exam stress.
-3. **Some combos are still love.** `爱你，笨蛋` contains an insult but is affection. Special-case these few.
+1. **否定会翻转情绪。** 词前面紧挨着否定词（不 / 没 / 别 / not）时：爱、想念、夸奖 → *受伤*；难过、累、生病、生气 → *松了一口气*；好消息 → *难过*。
+   `不爱你` → 受伤 · `不难过了` → 松了一口气 · `没考过` → 难过
+2. **长的短语优先。** 被包含在一个更长的已命中短语里的词，不单独计算。`考试过了` 是好消息，其中的 `考试` 不应该再触发“考试压力”。
+3. **有些组合仍然是爱。** `爱你，笨蛋` 里有骂人的词，但其实是撒娇。这类少数情况单独处理。
 
-A *question* feeling only applies when nothing else matched. Text with no match gets a plain "he read it carefully" response, which is fine, and makes the matched ones feel earned.
+“提问”这种情绪只在什么都没命中时才生效。什么都没命中的文字，就得到一句“他认真地读完了”。这完全没问题，反而让命中的那些显得更珍贵。
 
-### Variety without rerolls
+### 有变化，但不重抽
 
-- Reply index = `hash(entryId + ':reply') % lines.length`, so the reply is fixed for that entry.
-- If it equals the last reply for the same feeling, take the next one, so the same line never appears twice in a row.
-- Repeating the same feeling within a day gives less mood each time (`× 1/(1 + 0.6·n)`, min 0.3). Writing "I love you" ten times is sweet, not a stat farm.
-- Store the reply on the entry. The AI companion reads the same reply the human saw.
+- 回复序号 = `hash(entryId + ':reply') % lines.length`，所以同一条记录的回复是固定的。
+- 如果和同一种情绪的上一句回复相同，就顺延到下一句：同一句话不会连续出现两次。
+- 一天内同一种情绪重复出现，心情收益递减（`× 1/(1 + 0.6·n)`，最低 0.3）。写十次“我爱你”很甜，但刷不了数值。
+- 把回复存在记录上，AI 伴侣读到的就是人看到的那一句。
 
-## Travel: a huge combination
+## 旅行：一个超大的组合
 
-The pet goes on trips in real time and comes back with souvenirs and postcards. The goal: every trip feels different and a little unexpected.
+小宠物按真实时间出门旅行，带着纪念品和明信片回来。目标是每一次旅行都不一样，还带一点意外。
 
-### Each destination is a small world
+> **这一部分是很私人的。** 有哪些地方、小宠物喜欢什么、吃什么、遇见谁，都应该来自**你们**的生活和**你们**小伙伴的喜好：你们梦想去的城市、一起去过的咖啡馆、只有你们懂的玩笑。下面的结构可以共享，内容不是拿来照抄的。十六个目的地是个不错的开始，剩下的交给组合。
+
+### 每个目的地都是一个小世界
 
 ```js
-{ id:'kyoto', name:'京都', tags:['tea','quiet','flowers'], souvenir:'...', extras:['...'],   // bonus souvenirs
+{ id:'kyoto', name:'京都', tags:['tea','quiet','flowers'], souvenir:'...', extras:['...'],   // 额外纪念品
   weather:['sunny','rain','petals'], foods:['抹茶团子','汤豆腐', ...],
   meets:['一只小鹿冲他鞠了一躬，他也鞠了回去。', ...],
   spots:[{id,name}, ...5] }
 ```
 
-### Postcards are assembled, not written
+### 明信片是拼出来的，不是写好的
 
-A postcard is built from independent pools, each picked with the trip's fixed hash:
+一张明信片由几个独立的池子组成，每个池子都用这次旅行的固定哈希来选：
 
 ```
-opening(place) + weather line + spot line + (encounter | food line) + feeling + signature + P.S.
+开头（地点）+ 天气 + 景点 + （偶遇 | 食物）+ 心情 + 署名 + P.S.
 ```
 
-With 8–10 options per pool, the number of distinct postcards is in the millions. In testing, 40 trips gave 40 different postcards. Write lines so **any combination reads naturally**: short, self-contained sentences, with no references to the previous line.
+每个池子 8–10 个选项，不同明信片的数量就是几百万。测试里 40 次旅行得到了 40 张不同的明信片。写句子时要保证**任意组合都读得通**：短、独立成句、不要指代上一句。
 
-### A trip story that agrees with the postcard
+### 和明信片对得上的旅行故事
 
-The trip result shows weather, what he ate, who he met, sometimes a small **mishap** (~35%: "风把他的帽子吹进了河里，一只鸭子帮他捡了回来。") and sometimes a **bonus souvenir** (~40%). Use the same hash keys for the story's weather and food as for the first postcard, so the postcard says "it rained" when the story says "rain". Long trips send a second postcard.
+旅行结果会显示天气、吃了什么、遇见了谁，有时还有一个**小意外**（约 35%：“风把他的帽子吹进了河里，一只鸭子帮他捡了回来。”），有时带回一件**额外的纪念品**（约 40%）。故事里的天气和食物，用和第一张明信片相同的哈希键来选，这样故事说“下雨”时，明信片上写的也是“下雨了”。长途旅行会寄回第二张明信片。
 
-### Small details that matter
+### 重要的小细节
 
-- **Place-specific encounters 3 in 5.** With 2 local lines and 12 generic ones in one pool, the local ones almost never showed. Weight them.
-- **Point of view.** The story is told *about* him (他); the postcard is written *by* him (我). Write encounters once in third person and convert when composing the postcard (他 → 我), and check that no line contains 他们 / 其他.
-- **Tags need labels.** Every tag that can appear in the UI needs a human label, or "rain" leaks into a Chinese sentence.
-- **How well it went** comes from the pet's stable tastes vs the destination's tags, plus what it brought (a camera at a scenic spot, an umbrella in rain).
+- **当地的偶遇占五分之三。** 2 句当地的和 12 句通用的混在一个池子里时，当地的几乎从不出现。要按来源加权。
+- **人称。** 旅行故事是**讲他的**（他），明信片是**他写的**（我）。偶遇统一用第三人称写一次，拼明信片时再转换（他 → 我），并检查没有句子含“他们”“其他”。
+- **标签要有名字。** 每个可能出现在界面上的标签都需要一个中文名，否则 “rain” 会漏进中文句子里。
+- **玩得开不开心**取决于小宠物稳定的喜好和目的地标签的契合度，再加上它带了什么（风景好的地方带相机，下雨天带伞）。
 
-## Proofreading combinatorial text
+## 怎么校对组合出来的文字
 
-You can't read millions of postcards, but you can sample them. Run 40 sandbox trips and print every postcard and story, then read them all. Mixed voice, missing particles and leaked tags show up within a few dozen samples.
+几百万张明信片读不完，但可以抽样。跑 40 次沙盒旅行，把每张明信片和每个故事打印出来，全部读一遍。人称混乱、漏字、漏出来的标签，几十个样本里就会出现。
