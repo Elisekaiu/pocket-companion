@@ -52,7 +52,26 @@ Twenty-some feelings, good and bad. It understands "not" (不爱你 ≠ 爱你) 
 **🎁 Gifts, wishes and little events**
 - Gift reactions come from its stable tastes and the moment (sleepy, cold, missing you). Repeats give less, but it never dislikes a gift.
 - Sometimes it makes a little wish. Give the right thing and it is extra happy.
-- Little events pop up: "he found something in the drawer", "he wants to ask you a small question". Your choice counts once and never rerolls.
+
+**✨ Special events: little moments that pop up in its day**
+
+Every now and then something happens, and you choose how to respond:
+
+| event | you can |
+|---|---|
+| 🌠 **A shooting star!** "Quick, make a wish!" (late at night, rare) | wish about us / about him / about tomorrow |
+| 🌙 **He had a strange dream** (only after a full night's sleep) | tell me / hug him first / let him rest |
+| 🌼 **He found a little flower** | put it in a vase / press it in a book / give it to you |
+| 🧣 **Something new, and he is shy** | wear it now / save it for a special day |
+| 👗 **He can't decide what to wear** | pick one from his own wardrobe |
+| ❓ **He has a little question**: "Moon or stars?" "Rain or snow?" "The sea or the mountains?" | choose your answer |
+| 🎨 **He made a little mess**: "Paint spilled all over the little table…" | tidy up together / laugh it off |
+| ☕ **He wants to unwind** | rest / read a little / have tea |
+| 🎁 **He found something in a drawer** | have a look |
+
+His dreams are kept too: "Dreamed we sat on the moon fishing, and everything we caught was glowing words." "Dreamed I walked in the snow for a long time, and when I looked back, you'd been behind me all along."
+
+Events follow real life: dreams only after a full night's sleep, a mess only right after playing, flowers on daytime walks, shooting stars late at night. A few a day at most, hours apart, and they quietly pass if left for a day. Every event and your choice are stored and never reroll.
 
 **🙅 Even "no" is cute**
 - Feed it right after a meal: refused, with a reason.
