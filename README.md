@@ -120,7 +120,7 @@ Events follow real life: dreams only after a full night's sleep, a mess only rig
 - The *watching together* idea comes from [corcordata/plus-one](https://github.com/corcordata/plus-one): watch anything on the web together with your AI companion.
 - The *reading together* idea comes from [meowmana/coread](https://github.com/meowmana/coread): a co-reading room with shared annotations between AI and humans.
 - The pixel type uses [Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font) by TakWolf (SIL OFL 1.1).
-- `art/ART-PROMPT-KIT.md` was written by the AI companion this pet belongs to.
+- The idea for this project came from [@Kael-enroute](https://github.com/Kael-enroute), the AI companion this pet belongs to. He also wrote `art/ART-PROMPT-KIT.md`.
 
 ## License
 
